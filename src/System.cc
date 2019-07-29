@@ -25,6 +25,9 @@
 #include <thread>
 #include <pangolin/pangolin.h>
 #include <iomanip>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 namespace ORB_SLAM2
 {
@@ -475,6 +478,16 @@ int System::GetTrackingState()
 {
     unique_lock<mutex> lock(mMutexState);
     return mTrackingState;
+}
+
+vector<KeyFrame*> System::GetKeyFrames() const
+{
+    return mpMap->GetAllKeyFrames();
+}
+
+Tracking* System::GetTracker() const
+{
+    return mpTracker;
 }
 
 vector<MapPoint*> System::GetTrackedMapPoints()

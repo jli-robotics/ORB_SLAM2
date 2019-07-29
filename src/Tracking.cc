@@ -36,7 +36,9 @@
 #include<iostream>
 
 #include<mutex>
-
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -577,7 +579,7 @@ void Tracking::MonocularInitialization()
             if(mpInitializer)
                 delete mpInitializer;
 
-            mpInitializer =  new Initializer(mCurrentFrame,1.0,200);
+            mpInitializer =  new Initializer(mCurrentFrame,1.0,1000);
 
             fill(mvIniMatches.begin(),mvIniMatches.end(),-1);
 
