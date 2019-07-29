@@ -398,7 +398,54 @@ bool LoopClosing::ComputeSim3()
         mpCurrentKF->SetErase();
         return false;
     }
+    
+    KeyFrameAndPose CorrectedSim3, NonCorrectedSim3;
 
+}
+
+void LoopClosing::CorrectLoop(KeyFrame* pLoopKF, KeyFrame* pCurKF,
+                              const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
+                              const LoopClosing::KeyFrameAndPose &CorrectedSim3,
+                              const map<KeyFrame *, set<KeyFrame *> > &LoopConnections)
+{
+    cout << "Loop informed!" << endl;
+
+    // Send a stop signal to Local Mapping
+    // Avoid new keyframes are inserted while correcting the loop
+    mpLocalMapper->RequestStop();
+
+    // If a Global Bundle Adjustment is running, abort it
+    if(isRunningGBA())
+    {
+        unique_lock<mutex> lock(mMutexGBA);
+        mbStopGBA = true;
+
+        mnFullBAIdx++;
+
+        if(mpThreadGBA)
+        {
+            mpThreadGBA->detach();
+            delete mpThreadGBA;
+        }
+    }
+
+    // Wait until Local Mapping has effectively stopped
+    while(!mpLocalMapper->isStopped())
+    {
+        usleep(1000);
+    }
+
+    // Ensure current keyframe is updated
+    mpCurrentKF->UpdateConnections();
+    
+    
+    Optimizer::OptimizeEssentialGraph(mpMap, pLoopKF, pCurKF, NonCorrectedSim3, CorrectedSim3, LoopConnections, mbFixScale);
+
+    mpMap->InformNewBigChange();
+
+    // Loop closed. Release Local Mapping.
+    mpLocalMapper->Release();    
+    
 }
 
 void LoopClosing::CorrectLoop()

@@ -79,9 +79,14 @@ public:
     void RequestFinish();
 
     bool isFinished();
+    
+    void CorrectLoop(KeyFrame* pLoopKF, KeyFrame* pCurKF,
+                    const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
+                    const LoopClosing::KeyFrameAndPose &CorrectedSim3,
+                    const map<KeyFrame *, set<KeyFrame *> > &LoopConnections);
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
+    
 protected:
 
     bool CheckNewKeyFrames();
