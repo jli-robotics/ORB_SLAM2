@@ -80,7 +80,7 @@ public:
 
     bool isFinished();
     
-    void CorrectLoop(KeyFrame* pLoopKF, KeyFrame* pCurKF,
+    void InformExternalLoop(KeyFrame* pLoopKF, KeyFrame* pCurKF,
                     const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
                     const LoopClosing::KeyFrameAndPose &CorrectedSim3,
                     const map<KeyFrame *, set<KeyFrame *> > &LoopConnections);
@@ -98,7 +98,8 @@ protected:
     void SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap);
 
     void CorrectLoop();
-
+    void CorrectExternalLoop();
+    
     void ResetIfRequested();
     bool mbResetRequested;
     std::mutex mMutexReset;
@@ -134,6 +135,14 @@ protected:
     std::vector<MapPoint*> mvpLoopMapPoints;
     cv::Mat mScw;
     g2o::Sim3 mg2oScw;
+    
+    // Loop detected from external sources
+    bool externalLoopDetected;
+    KeyFrame* eLoopKF;
+    KeyFrame* eCurKF;
+    LoopClosing::KeyFrameAndPose eNonCorrectedSim3;
+    LoopClosing::KeyFrameAndPose eCorrectedSim3;
+    map<KeyFrame *, set<KeyFrame *> > eLoopConnections;
 
     long unsigned int mLastLoopKFid;
 

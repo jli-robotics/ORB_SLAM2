@@ -39,8 +39,14 @@ namespace ORB_SLAM2
 
 LoopClosing::LoopClosing(Map *pMap, KeyFrameDatabase *pDB, ORBVocabulary *pVoc, const bool bFixScale):
     mbResetRequested(false), mbFinishRequested(false), mbFinished(true), mpMap(pMap),
-    mpKeyFrameDB(pDB), mpORBVocabulary(pVoc), mpMatchedKF(NULL), mLastLoopKFid(0), mbRunningGBA(false), mbFinishedGBA(true),
-    mbStopGBA(false), mpThreadGBA(NULL), mbFixScale(bFixScale), mnFullBAIdx(0)
+    mpKeyFrameDB(pDB), mpORBVocabulary(pVoc), mpMatchedKF(NULL), 
+    
+    externalLoopDetected(false), eLoopKF(NULL), eCurKF(NULL),
+    
+    mLastLoopKFid(0), mbRunningGBA(false), mbFinishedGBA(true), 
+    mbStopGBA(false), mpThreadGBA(NULL),  
+    mbFixScale(bFixScale), mnFullBAIdx(0)
+    
 {
     mnCovisibilityConsistencyTh = 3;
 }
@@ -77,6 +83,10 @@ void LoopClosing::Run()
                }
             }
         }       
+        
+        if (externalLoopDetected) {
+            CorrectExternalLoop();
+        }
 
         ResetIfRequested();
 
@@ -399,14 +409,23 @@ bool LoopClosing::ComputeSim3()
         return false;
     }
     
-    KeyFrameAndPose CorrectedSim3, NonCorrectedSim3;
-
 }
 
-void LoopClosing::CorrectLoop(KeyFrame* pLoopKF, KeyFrame* pCurKF,
+void LoopClosing::InformExternalLoop(KeyFrame* loopKF, KeyFrame* curKF,
                               const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
                               const LoopClosing::KeyFrameAndPose &CorrectedSim3,
                               const map<KeyFrame *, set<KeyFrame *> > &LoopConnections)
+{
+    unique_lock<mutex> lock(mMutexLoopQueue);
+    externalLoopDetected = true;
+    eLoopKF = loopKF;
+    eCurKF = curKF;
+    eNonCorrectedSim3 = NonCorrectedSim3;
+    eCorrectedSim3 = CorrectedSim3;
+    eLoopConnections = LoopConnections;
+}
+
+void LoopClosing::CorrectExternalLoop()
 {
     cout << "Loop informed!" << endl;
 
@@ -439,12 +458,14 @@ void LoopClosing::CorrectLoop(KeyFrame* pLoopKF, KeyFrame* pCurKF,
     mpCurrentKF->UpdateConnections();
     
     
-    Optimizer::OptimizeEssentialGraph(mpMap, pLoopKF, pCurKF, NonCorrectedSim3, CorrectedSim3, LoopConnections, mbFixScale);
+    Optimizer::OptimizeEssentialGraph(mpMap, eLoopKF, eCurKF, eNonCorrectedSim3, eCorrectedSim3, eLoopConnections, mbFixScale);
 
     mpMap->InformNewBigChange();
 
     // Loop closed. Release Local Mapping.
     mpLocalMapper->Release();    
+    
+    externalLoopDetected = false;
     
 }
 
