@@ -458,9 +458,9 @@ void LoopClosing::CorrectExternalLoop()
     mpCurrentKF->UpdateConnections();
     
     
-    Optimizer::OptimizeEssentialGraph(mpMap, eLoopKF, eCurKF, eNonCorrectedSim3, eCorrectedSim3, eLoopConnections, mbFixScale);
+    Optimizer::OptimizeEssentialGraph(mpMap, eLoopKF, eCurKF, eNonCorrectedSim3, eCorrectedSim3, eLoopConnections, mbFixScale, true);
 
-    mpMap->InformNewBigChange();
+    //mpMap->InformNewBigChange();
 
     // Loop closed. Release Local Mapping.
     mpLocalMapper->Release();    
@@ -634,7 +634,7 @@ void LoopClosing::CorrectLoop()
     }
 
     // Optimize graph
-    Optimizer::OptimizeEssentialGraph(mpMap, mpMatchedKF, mpCurrentKF, NonCorrectedSim3, CorrectedSim3, LoopConnections, mbFixScale);
+    Optimizer::OptimizeEssentialGraph(mpMap, mpMatchedKF, mpCurrentKF, NonCorrectedSim3, CorrectedSim3, LoopConnections, mbFixScale, false);
 
     mpMap->InformNewBigChange();
 

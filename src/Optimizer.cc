@@ -781,7 +781,8 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pKF, bool* pbStopFlag, Map* pMap
 void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* pCurKF,
                                        const LoopClosing::KeyFrameAndPose &NonCorrectedSim3,
                                        const LoopClosing::KeyFrameAndPose &CorrectedSim3,
-                                       const map<KeyFrame *, set<KeyFrame *> > &LoopConnections, const bool &bFixScale)
+                                       const map<KeyFrame *, set<KeyFrame *> > &LoopConnections, 
+                                       const bool &bFixScale, const bool fixCorrectionVertices)
 {
     // Setup optimizer
     g2o::SparseOptimizer optimizer;
@@ -821,6 +822,11 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
         {
             vScw[nIDi] = it->second;
             VSim3->setEstimate(it->second);
+            
+            if (fixCorrectionVertices) {
+                cout << "Setting corrected vertex " << nIDi << " to be fixed\n";
+                VSim3->setFixed(true);
+            }
         }
         else
         {
@@ -831,8 +837,10 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
             VSim3->setEstimate(Siw);
         }
 
-        if(pKF==pLoopKF)
+        if(pKF==pLoopKF) {
             VSim3->setFixed(true);
+            cout << "Setting loop vertex " << nIDi << " to be fixed\n";
+        }
 
         VSim3->setId(nIDi);
         VSim3->setMarginalized(false);
@@ -856,12 +864,17 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
         const set<KeyFrame*> &spConnections = mit->second;
         const g2o::Sim3 Siw = vScw[nIDi];
         const g2o::Sim3 Swi = Siw.inverse();
-
+        
+        // Loop over the keyframes that pKF is connected to
         for(set<KeyFrame*>::const_iterator sit=spConnections.begin(), send=spConnections.end(); sit!=send; sit++)
         {
             const long unsigned int nIDj = (*sit)->mnId;
-            if((nIDi!=pCurKF->mnId || nIDj!=pLoopKF->mnId) && pKF->GetWeight(*sit)<minFeat)
+            cout << "Connection between " << nIDi << " and " << nIDj << " with " << pKF->GetWeight(*sit) << " features";
+            if((nIDi!=pCurKF->mnId || nIDj!=pLoopKF->mnId) && pKF->GetWeight(*sit)<minFeat) {
+                cout << " is too weak\n";
                 continue;
+            }
+            cout << " is valid\n";
 
             const g2o::Sim3 Sjw = vScw[nIDj];
             const g2o::Sim3 Sji = Sjw * Swi;
@@ -875,7 +888,7 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
 
             optimizer.addEdge(e);
 
-            sInsertedEdges.insert(make_pair(min(nIDi,nIDj),max(nIDi,nIDj)));
+            sInsertedEdges.insert(   make_pair( min(nIDi,nIDj), max(nIDi,nIDj) )   );
         }
     }
 
@@ -922,7 +935,8 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
             optimizer.addEdge(e);
         }
 
-        // Loop edges
+        // Previous loop edges
+        // Loop edges that were added after previous loop correction operations
         const set<KeyFrame*> sLoopEdges = pKF->GetLoopEdges();
         for(set<KeyFrame*>::const_iterator sit=sLoopEdges.begin(), send=sLoopEdges.end(); sit!=send; sit++)
         {
@@ -957,7 +971,8 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
             {
                 if(!pKFn->isBad() && pKFn->mnId<pKF->mnId)
                 {
-                    if(sInsertedEdges.count(make_pair(min(pKF->mnId,pKFn->mnId),max(pKF->mnId,pKFn->mnId))))
+                    // If this pair of vertices is already a loop edge
+                    if(sInsertedEdges.count(make_pair(   min(pKF->mnId, pKFn->mnId), max(pKF->mnId, pKFn->mnId)   )))
                         continue;
 
                     g2o::Sim3 Snw;
