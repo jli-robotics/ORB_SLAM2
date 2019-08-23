@@ -459,14 +459,34 @@ void LoopClosing::CorrectExternalLoop()
     
     
     Optimizer::OptimizeEssentialGraph(mpMap, eLoopKF, eCurKF, eNonCorrectedSim3, eCorrectedSim3, eLoopConnections, mbFixScale, true);
-
-    //mpMap->InformNewBigChange();
-
+    
+    cout << "Optimization step done" << endl;
+    
+    mpMap->InformNewBigChange();
+    
+    
+    cout << "informed big change" << endl;
+    
+    // Add loop edge
+    eLoopKF->AddLoopEdge(eCurKF);
+    eCurKF->AddLoopEdge(eLoopKF);
+    
+    
+    cout << "Added loop edges" << endl;
+    
+    // Launch a new thread to perform Global Bundle Adjustment
+    //mbRunningGBA = true;
+    //mbFinishedGBA = false;
+    //mbStopGBA = false;
+    //mpThreadGBA = new thread(&LoopClosing::RunGlobalBundleAdjustment,this,mpCurrentKF->mnId);
+    
+    //cout << "Launched global BA" << endl;
+    
     // Loop closed. Release Local Mapping.
-    mpLocalMapper->Release();    
-    
+    mpLocalMapper->Release();
+
+    mLastLoopKFid = mpCurrentKF->mnId;
     externalLoopDetected = false;
-    
 }
 
 void LoopClosing::CorrectLoop()
