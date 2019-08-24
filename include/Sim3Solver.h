@@ -35,7 +35,9 @@ namespace ORB_SLAM2
 class Sim3Solver
 {
 public:
-
+    
+    Sim3Solver(const bool bFixScale = true);
+    
     Sim3Solver(KeyFrame* pKF1, KeyFrame* pKF2, const std::vector<MapPoint*> &vpMatched12, const bool bFixScale = true);
 
     void SetRansacParameters(double probability = 0.99, int minInliers = 6 , int maxIterations = 300);
@@ -47,13 +49,21 @@ public:
     cv::Mat GetEstimatedRotation();
     cv::Mat GetEstimatedTranslation();
     float GetEstimatedScale();
-
+    
+    void ComputeSim3(cv::Mat &P1, cv::Mat &P2);
+    
+    // Current Estimation
+    cv::Mat mR12i;
+    cv::Mat mt12i;
+    float ms12i;
+    cv::Mat mT12i;
+    cv::Mat mT21i;
+    std::vector<bool> mvbInliersi;
+    int mnInliersi;
 
 protected:
 
     void ComputeCentroid(cv::Mat &P, cv::Mat &Pr, cv::Mat &C);
-
-    void ComputeSim3(cv::Mat &P1, cv::Mat &P2);
 
     void CheckInliers();
 
@@ -80,15 +90,6 @@ protected:
 
     int N;
     int mN1;
-
-    // Current Estimation
-    cv::Mat mR12i;
-    cv::Mat mt12i;
-    float ms12i;
-    cv::Mat mT12i;
-    cv::Mat mT21i;
-    std::vector<bool> mvbInliersi;
-    int mnInliersi;
 
     // Current Ransac State
     int mnIterations;

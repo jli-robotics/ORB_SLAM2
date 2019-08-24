@@ -26,6 +26,7 @@
 #include <opencv2/core/core.hpp>
 
 #include "KeyFrame.h"
+#include "Sim3Solver.h"
 #include "ORBmatcher.h"
 
 #include "Thirdparty/DBoW2/DUtils/Random.h"
@@ -33,6 +34,9 @@
 namespace ORB_SLAM2
 {
 
+Sim3Solver::Sim3Solver(const bool bFixScale): mbFixScale(bFixScale) {
+    
+}
 
 Sim3Solver::Sim3Solver(KeyFrame *pKF1, KeyFrame *pKF2, const vector<MapPoint *> &vpMatched12, const bool bFixScale):
     mnIterations(0), mnBestInliers(0), mbFixScale(bFixScale)
@@ -286,11 +290,13 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
     // Step 5: Rotate set 2
 
     cv::Mat P3 = mR12i*Pr2;
-
+    
+    
     // Step 6: Scale
 
     if(!mbFixScale)
     {
+        cout << "Scale is not fixed" << endl;
         double nom = Pr1.dot(P3);
         cv::Mat aux_P3(P3.size(),P3.type());
         aux_P3=P3;
@@ -307,13 +313,16 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
 
         ms12i = nom/den;
     }
-    else
+    else {
+        cout << "Scale fixed" << endl;
         ms12i = 1.0f;
+    }
 
     // Step 7: Translation
 
     mt12i.create(1,3,P1.type());
     mt12i = O1 - ms12i*mR12i*O2;
+    
 
     // Step 8: Transformation
 
@@ -334,6 +343,18 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
     sRinv.copyTo(mT21i.rowRange(0,3).colRange(0,3));
     cv::Mat tinv = -sRinv*mt12i;
     tinv.copyTo(mT21i.rowRange(0,3).col(3));
+    
+    
+    
+    cout << "Sim3: rotation" << endl;
+    cout << mR12i << endl;
+    
+    
+    cout << "Sim3: translation" << endl;
+    cout << mt12i << endl;
+    
+    cout << "Sim3: scale" << endl;
+    cout << ms12i << endl;
 }
 
 
