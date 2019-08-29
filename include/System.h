@@ -25,6 +25,7 @@
 #include<string>
 #include<thread>
 #include<opencv2/core/core.hpp>
+#define CV_LOAD_IMAGE_UNCHANGED -1
 
 #include "Tracking.h"
 #include "FrameDrawer.h"
@@ -131,7 +132,7 @@ public:
     // a pose graph optimization and full bundle adjustment (in a new thread) afterwards.
     LoopClosing* mpLoopCloser;
 
-private:
+// private: // KARIM CHANGED THIS
 
     // Input sensor
     eSensor mSensor;

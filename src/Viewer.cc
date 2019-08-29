@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <Osmap.h>
 
 namespace ORB_SLAM2
 {
@@ -75,6 +76,7 @@ void Viewer::Run()
     pangolin::Var<bool> menuShowGraph("menu.Show Graph",true,true);
     pangolin::Var<bool> menuLocalizationMode("menu.Localization Mode",false,true);
     pangolin::Var<bool> menuReset("menu.Reset",false,false);
+    pangolin::Var<bool> menuSaveMap("menu.Save Map",false,false);
 
     // Define Camera Render Object (for view / scene browsing)
     pangolin::OpenGlRenderState s_cam(
@@ -154,6 +156,23 @@ void Viewer::Run()
             menuFollowCamera = true;
             mpSystem->Reset();
             menuReset = false;
+        }
+        if(menuSaveMap)
+        {
+          menuShowGraph = true;
+          menuShowKeyFrames = true;
+          menuShowPoints = true;
+          menuLocalizationMode = false;
+          if(bLocalizationMode)
+              mpSystem->DeactivateLocalizationMode();
+          bLocalizationMode = false;
+          bFollow = true;
+          menuFollowCamera = true;
+          Osmap osmap = ORB_SLAM2::Osmap(*mpSystem);
+          osmap.verbose = true;
+          osmap.mapSave("saved_map", false);
+          menuSaveMap = false;
+          menuReset = false;
         }
 
         if(Stop())

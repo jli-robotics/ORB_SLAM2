@@ -26,10 +26,11 @@
 
 #include<opencv2/core/core.hpp>
 
-#include<System.h>
+#include <System.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <Osmap.h>
 
 using namespace std;
 
@@ -38,10 +39,24 @@ void LoadImages(const string &strFile, vector<string> &vstrImageFilenames,
 
 int main(int argc, char **argv)
 {
-    if(argc != 4)
+    if(argc < 5)
     {
-        cerr << endl << "Usage: ./mono_tum path_to_vocabulary path_to_settings path_to_sequence" << endl;
+        cerr << endl << "Usage: ./mono_tum path_to_vocabulary path_to_settings path_to_sequence load_map/fresh_map" << endl;
         return 1;
+    }
+
+    // Define whether we're loading a map or not:
+    bool load_map;
+    std::string action(argv[4]);
+    std::string map_path;
+    if (action == "load_map") {
+        load_map = true;
+        map_path = argv[5];
+    } else if (action == "fresh_map") {
+        load_map = false;
+    } else {
+        // Report invalid argument
+        cerr << endl << "Usage: ./mono_tum path_to_vocabulary path_to_settings path_to_sequence load_map/fresh_map" << endl;
     }
 
     // Retrieve paths to images
@@ -55,6 +70,21 @@ int main(int argc, char **argv)
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
     ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::MONOCULAR,true);
 
+    // Load only first image to initialize TrackMonocular
+  	cv::Mat im;
+  	im = cv::imread(string(argv[3])+"/"+vstrImageFilenames[0],CV_LOAD_IMAGE_UNCHANGED);
+  	double tframe = vTimestamps[0];
+
+  	SLAM.TrackMonocular(im,tframe);
+
+  	// Loading the map
+    ORB_SLAM2::Osmap osmap = ORB_SLAM2::Osmap(SLAM);
+    osmap.verbose = false;
+    if(load_map == true){
+      cout << map_path << endl;
+      osmap.mapLoad(map_path, true, false);
+    }
+
     // Vector for tracking time statistics
     vector<float> vTimesTrack;
     vTimesTrack.resize(nImages);
@@ -64,8 +94,8 @@ int main(int argc, char **argv)
     cout << "Images in the sequence: " << nImages << endl << endl;
 
     // Main loop
-    cv::Mat im;
-    for(int ni=0; ni<nImages; ni++)
+    // cv::Mat im;
+    for(int ni=329; ni<nImages; ni++)
     {
         // Read image from file
         im = cv::imread(string(argv[3])+"/"+vstrImageFilenames[ni],CV_LOAD_IMAGE_UNCHANGED);
@@ -106,7 +136,11 @@ int main(int argc, char **argv)
 
         if(ttrack<T)
             usleep((T-ttrack)*1e6);
+
+        // cout << ni << endl;
     }
+
+    cout << "finished going through sequence" << endl;
 
     // Stop all threads
     SLAM.Shutdown();
@@ -124,6 +158,8 @@ int main(int argc, char **argv)
 
     // Save camera trajectory
     SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");
+
+    osmap.mapSave("final_map");
 
     return 0;
 }
