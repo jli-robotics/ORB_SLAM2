@@ -296,7 +296,7 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
 
     if(!mbFixScale)
     {
-        cout << "Scale is not fixed" << endl;
+        //cout << "Scale is not fixed" << endl;
         double nom = Pr1.dot(P3);
         cv::Mat aux_P3(P3.size(),P3.type());
         aux_P3=P3;
@@ -314,7 +314,7 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
         ms12i = nom/den;
     }
     else {
-        cout << "Scale fixed" << endl;
+        //cout << "Scale fixed" << endl;
         ms12i = 1.0f;
     }
 
@@ -344,17 +344,15 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
     cv::Mat tinv = -sRinv*mt12i;
     tinv.copyTo(mT21i.rowRange(0,3).col(3));
     
-    
-    
+    /*
     cout << "Sim3: rotation" << endl;
     cout << mR12i << endl;
-    
     
     cout << "Sim3: translation" << endl;
     cout << mt12i << endl;
     
     cout << "Sim3: scale" << endl;
-    cout << ms12i << endl;
+    cout << ms12i << endl;*/
 }
 
 
