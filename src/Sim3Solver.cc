@@ -35,7 +35,7 @@ namespace ORB_SLAM2
 {
 
 Sim3Solver::Sim3Solver(const bool bFixScale): mbFixScale(bFixScale) {
-    
+
 }
 
 Sim3Solver::Sim3Solver(KeyFrame *pKF1, KeyFrame *pKF2, const vector<MapPoint *> &vpMatched12, const bool bFixScale):
@@ -119,7 +119,7 @@ void Sim3Solver::SetRansacParameters(double probability, int minInliers, int max
 {
     mRansacProb = probability;
     mRansacMinInliers = minInliers;
-    mRansacMaxIts = maxIterations;    
+    mRansacMaxIts = maxIterations;
 
     N = mvpMapPoints1.size(); // number of correspondences
 
@@ -290,13 +290,17 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
     // Step 5: Rotate set 2
 
     cv::Mat P3 = mR12i*Pr2;
-    
-    
+
+
     // Step 6: Scale
 
     if(!mbFixScale)
     {
+<<<<<<< HEAD
         //cout << "Scale is not fixed" << endl;
+=======
+        // cout << "Scale is not fixed" << endl;
+>>>>>>> ab0bccd5ca4c48fdd12eeb6648c00b1f49a591dd
         double nom = Pr1.dot(P3);
         cv::Mat aux_P3(P3.size(),P3.type());
         aux_P3=P3;
@@ -314,7 +318,7 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
         ms12i = nom/den;
     }
     else {
-        //cout << "Scale fixed" << endl;
+        // cout << "Scale fixed" << endl;
         ms12i = 1.0f;
     }
 
@@ -322,7 +326,7 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
 
     mt12i.create(1,3,P1.type());
     mt12i = O1 - ms12i*mR12i*O2;
-    
+
 
     // Step 8: Transformation
 
@@ -343,7 +347,7 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
     sRinv.copyTo(mT21i.rowRange(0,3).colRange(0,3));
     cv::Mat tinv = -sRinv*mt12i;
     tinv.copyTo(mT21i.rowRange(0,3).col(3));
-    
+
     /*
     cout << "Sim3: rotation" << endl;
     cout << mR12i << endl;

@@ -39,14 +39,14 @@ namespace ORB_SLAM2
 
 LoopClosing::LoopClosing(Map *pMap, KeyFrameDatabase *pDB, ORBVocabulary *pVoc, const bool bFixScale):
     mbResetRequested(false), mbFinishRequested(false), mbFinished(true), mpMap(pMap),
-    mpKeyFrameDB(pDB), mpORBVocabulary(pVoc), mpMatchedKF(NULL), 
-    
+    mpKeyFrameDB(pDB), mpORBVocabulary(pVoc), mpMatchedKF(NULL),
+
     externalLoopDetected(false), eLoopKF(NULL), eCurKF(NULL),
-    
-    mLastLoopKFid(0), mbRunningGBA(false), mbFinishedGBA(true), 
-    mbStopGBA(false), mpThreadGBA(NULL),  
+
+    mLastLoopKFid(0), mbRunningGBA(false), mbFinishedGBA(true),
+    mbStopGBA(false), mpThreadGBA(NULL),
     mbFixScale(bFixScale), mnFullBAIdx(0)
-    
+
 {
     mnCovisibilityConsistencyTh = 3;
 }
@@ -82,8 +82,8 @@ void LoopClosing::Run()
                    CorrectLoop();
                }
             }
-        }       
-        
+        }
+
         if (externalLoopDetected) {
             CorrectExternalLoop();
         }
@@ -408,7 +408,7 @@ bool LoopClosing::ComputeSim3()
         mpCurrentKF->SetErase();
         return false;
     }
-    
+
 }
 
 void LoopClosing::InformExternalLoop(KeyFrame* loopKF, KeyFrame* curKF,
@@ -456,32 +456,32 @@ void LoopClosing::CorrectExternalLoop()
 
     // Ensure current keyframe is updated
     mpCurrentKF->UpdateConnections();
-    
-    
+
+
     Optimizer::OptimizeEssentialGraph(mpMap, eLoopKF, eCurKF, eNonCorrectedSim3, eCorrectedSim3, eLoopConnections, mbFixScale, true);
-    
+
     cout << "Optimization step done" << endl;
-    
+
     mpMap->InformNewBigChange();
-    
-    
+
+
     cout << "informed big change" << endl;
-    
+
     // Add loop edge
     eLoopKF->AddLoopEdge(eCurKF);
     eCurKF->AddLoopEdge(eLoopKF);
-    
-    
+
+
     cout << "Added loop edges" << endl;
-    
+
     // Launch a new thread to perform Global Bundle Adjustment
     //mbRunningGBA = true;
     //mbFinishedGBA = false;
     //mbStopGBA = false;
     //mpThreadGBA = new thread(&LoopClosing::RunGlobalBundleAdjustment,this,mpCurrentKF->mnId);
-    
+
     //cout << "Launched global BA" << endl;
-    
+
     // Loop closed. Release Local Mapping.
     mpLocalMapper->Release();
 
@@ -528,7 +528,6 @@ void LoopClosing::CorrectLoop()
     KeyFrameAndPose CorrectedSim3, NonCorrectedSim3;
     CorrectedSim3[mpCurrentKF]=mg2oScw;
     cv::Mat Twc = mpCurrentKF->GetPoseInverse();
-
 
     {
         // Get Map Mutex
@@ -656,22 +655,26 @@ void LoopClosing::CorrectLoop()
     // Optimize graph
     Optimizer::OptimizeEssentialGraph(mpMap, mpMatchedKF, mpCurrentKF, NonCorrectedSim3, CorrectedSim3, LoopConnections, mbFixScale, false);
 
+    cout << "Informing new big change " << endl;
     mpMap->InformNewBigChange();
 
     // Add loop edge
+    cout << "Adding loop edge " << endl;
     mpMatchedKF->AddLoopEdge(mpCurrentKF);
     mpCurrentKF->AddLoopEdge(mpMatchedKF);
 
     // Launch a new thread to perform Global Bundle Adjustment
+    cout << "launch new thread to perform GBA " << endl;
     mbRunningGBA = true;
     mbFinishedGBA = false;
     mbStopGBA = false;
     mpThreadGBA = new thread(&LoopClosing::RunGlobalBundleAdjustment,this,mpCurrentKF->mnId);
 
     // Loop closed. Release Local Mapping.
-    mpLocalMapper->Release();    
+    cout << "Loop closed, release local mapping" << endl;
+    mpLocalMapper->Release();
 
-    mLastLoopKFid = mpCurrentKF->mnId;   
+    mLastLoopKFid = mpCurrentKF->mnId;
 }
 
 void LoopClosing::SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap)
@@ -824,7 +827,7 @@ void LoopClosing::RunGlobalBundleAdjustment(unsigned long nLoopKF)
 
                     pMP->SetWorldPos(Rwc*Xc+twc);
                 }
-            }            
+            }
 
             mpMap->InformNewBigChange();
 
