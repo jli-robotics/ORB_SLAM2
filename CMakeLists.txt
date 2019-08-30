@@ -29,7 +29,7 @@ endif()
 
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
-find_package(OpenCV QUIET)
+find_package(OpenCV 3.0 QUIET)
 if(NOT OpenCV_FOUND)
    find_package(OpenCV 2.4.3 QUIET)
    if(NOT OpenCV_FOUND)
@@ -37,7 +37,7 @@ if(NOT OpenCV_FOUND)
    endif()
 endif()
 
-find_package(Eigen3 3.3.4 REQUIRED)
+find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
 
 include(FindProtobuf)
@@ -122,6 +122,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Monocular)
 add_executable(mono_tum
 Examples/Monocular/mono_tum.cc)
 target_link_libraries(mono_tum ${PROJECT_NAME})
+
+add_executable(mono_tum_orig
+Examples/Monocular/mono_tum_orig.cc)
+target_link_libraries(mono_tum_orig ${PROJECT_NAME})
 
 add_executable(mono_kitti
 Examples/Monocular/mono_kitti.cc)

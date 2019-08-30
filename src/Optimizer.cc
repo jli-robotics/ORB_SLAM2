@@ -837,15 +837,17 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
             vScw[nIDi] = Siw;
             VSim3->setEstimate(Siw);
         }
+        
+        if (fixCorrectionVertices) {
+          if (LoopConnections.count(pKF)) {
+              cout << "Setting loop connection key vertex " << nIDi << " to be fixed\n";
+              VSim3->setFixed(true);
+          }
 
-        if (LoopConnections.count(pKF)) {
-            cout << "Setting loop connection key vertex " << nIDi << " to be fixed\n";
-            VSim3->setFixed(true);
-        }
-
-        if(pKF==pLoopKF) {
-            VSim3->setFixed(true);
-            cout << "Setting loop vertex " << nIDi << " to be fixed\n";
+          if(pKF==pLoopKF) {
+              VSim3->setFixed(true);
+              cout << "Setting loop vertex " << nIDi << " to be fixed\n";
+          }
         }
 
         VSim3->setId(nIDi);

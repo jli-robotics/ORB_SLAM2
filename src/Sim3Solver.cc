@@ -296,11 +296,7 @@ void Sim3Solver::ComputeSim3(cv::Mat &P1, cv::Mat &P2)
 
     if(!mbFixScale)
     {
-<<<<<<< HEAD
-        //cout << "Scale is not fixed" << endl;
-=======
         // cout << "Scale is not fixed" << endl;
->>>>>>> ab0bccd5ca4c48fdd12eeb6648c00b1f49a591dd
         double nom = Pr1.dot(P3);
         cv::Mat aux_P3(P3.size(),P3.type());
         aux_P3=P3;

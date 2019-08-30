@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <Osmap.h>
 
 namespace ORB_SLAM2
 {
@@ -485,6 +486,16 @@ vector<KeyFrame*> System::GetKeyFrames() const
     return mpMap->GetAllKeyFrames();
 }
 
+void System::SaveMap(const string &filename) {
+  ORB_SLAM2::Osmap osmap = ORB_SLAM2::Osmap(*this);
+  osmap.mapSave(filename, false);
+}
+
+void System::LoadMap(const string &filename) {
+  ORB_SLAM2::Osmap osmap = ORB_SLAM2::Osmap(*this);
+  osmap.mapLoad(filename, true, false);
+}
+
 Tracking* System::GetTracker() const
 {
     return mpTracker;
@@ -500,6 +511,6 @@ vector<cv::KeyPoint> System::GetTrackedKeyPointsUn()
 {
     unique_lock<mutex> lock(mMutexState);
     return mTrackedKeyPointsUn;
-}
+} 
 
 } //namespace ORB_SLAM
