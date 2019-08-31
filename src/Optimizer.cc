@@ -1050,7 +1050,7 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
 
         if(pMP->isBad())
             continue;
-
+        
         int nIDr;
         if(pMP->mnCorrectedByKF==pCurKF->mnId)
         {
@@ -1059,9 +1059,13 @@ void Optimizer::OptimizeEssentialGraph(Map* pMap, KeyFrame* pLoopKF, KeyFrame* p
         else
         {
             KeyFrame* pRefKF = pMP->GetReferenceKeyFrame();
+            if (pRefKF ==  NULL) {
+              // Added this if because it seems like pRefKF could be null
+              // after map reload
+              continue;
+            }
             nIDr = pRefKF->mnId;
         }
-
 
         g2o::Sim3 Srw = vScw[nIDr];
         g2o::Sim3 correctedSwr = vCorrectedSwc[nIDr];
