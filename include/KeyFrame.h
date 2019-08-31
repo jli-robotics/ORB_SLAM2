@@ -100,6 +100,8 @@ public:
     // Enable/Disable bad flag changes
     void SetNotErase();
     void SetErase();
+    void SetKeep();
+    bool CheckKeep();
 
     // Set/check bad flag
     void SetBadFlag();
@@ -218,7 +220,10 @@ protected:
     KeyFrame* mpParent;
     std::set<KeyFrame*> mspChildrens;
     std::set<KeyFrame*> mspLoopEdges;
-
+    
+    // Indicate keep for object localization
+    bool keep;
+    
     // Bad flags
     bool mbNotErase;
     bool mbToBeErased;
