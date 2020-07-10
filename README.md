@@ -1,4 +1,7 @@
 # ORB-SLAM2
+
+This repo is adapted from raulmur's ORB_SLAM2. It has been modified to work with [our Python bindings](https://github.com/jli-robotics/ORB_SLAM2-PythonBindings), and includes some of the map saving utilities of [osmap](https://github.com/AlejandroSilvestri/osmap) developed by AlejandroSilvestri.
+
 **Authors:** [Raul Mur-Artal](http://webdiis.unizar.es/~raulmur/), [Juan D. Tardos](http://webdiis.unizar.es/~jdtardos/), [J. M. M. Montiel](http://webdiis.unizar.es/~josemari/) and [Dorian Galvez-Lopez](http://doriangalvez.com/) ([DBoW2](https://github.com/dorian3d/DBoW2))
 
 **13 Jan 2017**: OpenCV 3 and Eigen 3.3 are now supported.
