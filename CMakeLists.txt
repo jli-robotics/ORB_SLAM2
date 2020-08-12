@@ -37,28 +37,30 @@ if(NOT OpenCV_FOUND)
    endif()
 endif()
 
-find_package(Eigen3 3.1.0 REQUIRED)
+#find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Pangolin REQUIRED)
 
-include(FindProtobuf)
-find_package(Protobuf REQUIRED)
-if ( Protobuf_FOUND )
-    message( STATUS "Protobuf version : ${Protobuf_VERSION}" )
-    message( STATUS "Protobuf include path : ${Protobuf_INCLUDE_DIR}" )
-    message( STATUS "Protobuf libraries : ${Protobuf_LIBRARIES}" )
-    message( STATUS "Protobuf compiler libraries : ${Protobuf_PROTOC_LIBRARIES}")
-    message( STATUS "Protobuf lite libraries : ${Protobuf_LITE_LIBRARIES}")
-else()
-    message( WARNING "Protobuf package not found -> specify search path via PROTOBUF_ROOT variable")
-endif()
+#include(FindProtobuf)
+#find_package(Protobuf REQUIRED PATHS /usr/local/opt/protobuf@3.6)
+#if ( Protobuf_FOUND )
+#    message( STATUS "Protobuf version : ${Protobuf_VERSION}" )
+#    message( STATUS "Protobuf include path : ${Protobuf_INCLUDE_DIR}" )
+#    message( STATUS "Protobuf libraries : ${Protobuf_LIBRARIES}" )
+#    message( STATUS "Protobuf compiler libraries : ${Protobuf_PROTOC_LIBRARIES}")
+#    message( STATUS "Protobuf lite libraries : ${Protobuf_LITE_LIBRARIES}")
+#else()
+#    message( WARNING "Protobuf package not found -> specify search path via PROTOBUF_ROOT variable")
+#endif()
+
+#message(WARNING "Eigen include ${EIGEN3_INCLUDE_DIR}, Eigen lib ${EIGEN3_LIBS}")
 
 include_directories(
 ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/include
-${EIGEN3_INCLUDE_DIR}
+/Users/jimmy.li/gitrepo/eigen
 ${Pangolin_INCLUDE_DIRS}
-${PROTOBUF_INCLUDE_DIR}
-#/usr/local/include/google
+#${PROTOBUF_INCLUDE_DIR}
+/usr/local/opt/protobuf@3.6/include
 )
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
@@ -89,12 +91,13 @@ src/osmap.pb.cc
 
 target_link_libraries(${PROJECT_NAME}
 ${OpenCV_LIBS}
-${EIGEN3_LIBS}
+#${EIGEN3_LIBS}
 ${Pangolin_LIBRARIES}
-${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
-${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
-${PROTOBUF_LIBRARY}
+${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.dylib
+${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.dylib
+#${PROTOBUF_LIBRARY}
 #/usr/local/lib/libprotobuf.so.20.0
+/usr/local/opt/protobuf@3.6/lib/libprotobuf.dylib
 )
 
 
@@ -147,8 +150,8 @@ install(TARGETS ${PROJECT_NAME}
     DESTINATION  lib
     COMPONENT library)
 install(FILES
-        ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
-        ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+        ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.dylib
+        ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.dylib
     DESTINATION lib
     COMPONENT library)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
